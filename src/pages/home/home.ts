@@ -17,6 +17,35 @@ export class HomePage {
   sequence: number = 0;
   msg:string;
 
+  msgObj = {
+    serverName: null,
+    reportDate: null,
+    status: null,
+    msgShort: null,
+    msgDetail: null
+  };
+
+  notificationList: any[] = [];
+
+  addNotification(content: string) : any {
+      // serverName: 
+      // reportDate: 
+      // status: 
+      // msgShort: 
+      // msgDetail: 
+  
+      var notiObj = JSON.parse(content);
+      this.notificationList.push(notiObj);
+
+      this.msgObj.serverName = notiObj.serverName;
+      this.msgObj.reportDate = notiObj.reportDate;
+      this.msgObj.status = notiObj.status;
+      this.msgObj.msgShort = notiObj.msgShort;
+      this.msgObj.msgDetail = notiObj.msgDetail;
+
+      return notiObj;
+  }
+
   getRegistrationID() {
     this.jpush.getRegistrationID().then(rId => {
       this.registrationId = rId;
@@ -55,7 +84,11 @@ export class HomePage {
         }
         console.log('HomePage. on jpush.receiveNotification devicePlatform=' + this.devicePlatform);
         // alert("Receive notification: " + JSON.stringify(event));
-        this.msg = "Receive notification: " + JSON.stringify(event);
+
+        var notiObj = this.addNotification(content);
+
+        this.msg = "Receive notification: \n" + notiObj.msgDetail;
+        
         console.log('HomePage. on jpush.receiveNotification event=' + this.msg);
         
       },
@@ -84,8 +117,11 @@ export class HomePage {
             content = event.aps.alert;
           }
         }
+
+        var notiObj = this.addNotification(content);
+
         // alert("open notification: " + JSON.stringify(event));
-        this.msg = "open notification: " + JSON.stringify(event);
+        this.msg = "open notification: \n" + notiObj.msgDetail;
       },
       false
     );
