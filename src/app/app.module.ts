@@ -5,7 +5,9 @@ import { MyApp } from './app.component';
 
 import { ConfigPage } from '../pages/config/config';
 import { SvListPage } from '../pages/svlist/svlist';
+import { SvDetailPage } from '../pages/sv-detail/sv-detail';
 import { HomePage } from '../pages/home/home';
+import { MsgDetailPage } from '../pages/msg-detail/msg-detail';
 import { TabsPage } from '../pages/tabs/tabs';
 
 import { StatusBar } from '@ionic-native/status-bar';
@@ -22,7 +24,9 @@ import { Device } from '@ionic-native/device';
     MyApp,
     ConfigPage,
     SvListPage,
+    SvDetailPage,
     HomePage,
+    MsgDetailPage,
     TabsPage
   ],
   imports: [
@@ -35,7 +39,9 @@ import { Device } from '@ionic-native/device';
     MyApp,
     ConfigPage,
     SvListPage,
+    SvDetailPage,
     HomePage,
+    MsgDetailPage,
     TabsPage
   ],
   providers: [

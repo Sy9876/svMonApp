@@ -9,10 +9,10 @@
 <ion-content padding>
   <ion-list>
     <ion-list-header>服务器状态</ion-list-header>
-    <ion-item>
+    <ion-item *ngFor="let svObj of svObjList">
       <ion-icon name="ionic" item-start></ion-icon>
-      服务器名，状态
-      <button type="button" (click)="svStatus()">详细</button>
+      服务器名 {{svObj.serverName}}， 描述 {{svObj.serverDesc}}， 状态 {{svObj.serverStatus}}
+      <button type="button" (click)="svStatus(svObj)">详细</button>
     </ion-item>
   </ion-list>
 </ion-content>

@@ -5,10 +5,15 @@
 </ion-header>
 
 <ion-content padding>
-  <h2>消息详细</h2>
-  <p>服务器: {{msgObj.serverName}}</p>
-  <p>日期: {{msgObj.reportDate}}</p>
-  <p>状态: {{msgObj.status}}</p>
-  <p>消息详细: </p>
-  <textarea style="width:100%; height:60%;font-family:'MS Courier New',Courier,Serif;">{{msgObj.msgDetail}}</textarea>
+  <ion-list>
+    <ion-list-header>最近消息</ion-list-header>
+    <ion-item *ngFor="let msgObj of msgObjList">
+        <ion-icon *ngIf="msgObj.status === 'OK'" name="checkmark-circle-outline"></ion-icon>
+        <ion-icon *ngIf="msgObj.status !== 'OK'" name="close-circle"></ion-icon>
+        &nbsp;{{msgObj.serverName}} &nbsp;&nbsp; {{msgObj.msgShort}}
+        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {{msgObj.reportDate | date: 'y-M-d HH:mm'}} &nbsp;&nbsp;
+          <button type="button" (click)="msgDetail(msgObj)"><ion-icon name="arrow-dropright"></ion-icon></button>
+        </p>
+    </ion-item>
+  </ion-list>
 </ion-content>
