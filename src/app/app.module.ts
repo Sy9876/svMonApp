@@ -15,9 +15,11 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 
 import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
 import {InterceptorService} from "./interceptorService";
+import {DaoService} from "./DaoService";
 
 import { JPush } from '@jiguang-ionic/jpush';
 import { Device } from '@ionic-native/device';
+import { SQLite } from '@ionic-native/sqlite';
 
 @NgModule({
   declarations: [
@@ -50,7 +52,9 @@ import { Device } from '@ionic-native/device';
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     {provide:HTTP_INTERCEPTORS,useClass:InterceptorService,multi:true},
     Device,
-    JPush
+    JPush,
+    SQLite,
+    DaoService
   ]
 })
 export class AppModule {}

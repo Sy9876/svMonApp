@@ -6,6 +6,7 @@ import { SplashScreen } from '@ionic-native/splash-screen';
 import { TabsPage } from '../pages/tabs/tabs';
 
 import { JPush } from '@jiguang-ionic/jpush';
+import { SQLite, SQLiteObject } from '@ionic-native/sqlite';
 
 @Component({
   templateUrl: 'app.html'
@@ -13,7 +14,10 @@ import { JPush } from '@jiguang-ionic/jpush';
 export class MyApp {
   rootPage:any = TabsPage;
 
-  constructor(platform: Platform, statusBar: StatusBar, splashScreen: SplashScreen, jpush: JPush) {
+  constructor(platform: Platform, statusBar: StatusBar,
+     splashScreen: SplashScreen, jpush: JPush,
+     private sqlite: SQLite) {
+
     platform.ready().then(() => {
       console.log('MyApp  start');
       // Okay, so the platform is ready and our plugins are available.
@@ -26,7 +30,8 @@ export class MyApp {
       console.log('MyApp  jpush.setDebugMode');
       jpush.setDebugMode(true);
       console.log('MyApp  done');
-      
+
     });
   }
+
 }

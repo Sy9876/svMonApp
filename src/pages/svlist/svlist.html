@@ -8,7 +8,7 @@
 
 <ion-content padding>
   <ion-list>
-    <ion-list-header>服务器状态</ion-list-header>
+    <ion-list-header>服务器状态  消息总数{{totalMsgCount}}</ion-list-header>
     <ion-item *ngFor="let svObj of svObjList">
       <ion-icon name="ionic" item-start></ion-icon>
       服务器名 {{svObj.serverName}}， 描述 {{svObj.serverDesc}}， 状态 {{svObj.serverStatus}}

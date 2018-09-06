@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
+import { Platform } from 'ionic-angular';
 
 import { HttpClient } from '@angular/common/http';
 
 import { SvDetailPage } from '../sv-detail/sv-detail';
+import { DaoService } from '../../app/DaoService'
 
 @Component({
   selector: 'page-svlist',
@@ -11,10 +13,8 @@ import { SvDetailPage } from '../sv-detail/sv-detail';
 })
 export class SvListPage {
 
-  constructor(public navCtrl: NavController, public http: HttpClient) {
-
-  }
   msg:string;
+  totalMsgCount: number;
   svObjList: any[] =  [{
     "serverName": "sv1",
     "serverDesc": "tst",
@@ -30,6 +30,31 @@ export class SvListPage {
     "serverDesc": "product",
     "serverStatus": "OK"
   }];
+
+  constructor(public navCtrl: NavController, 
+    public platform: Platform,
+    public http: HttpClient, 
+    private daoService: DaoService) {
+
+  }
+
+  ngOnInit() {
+
+    this.platform.ready().then(() => {
+      console.log('SvListPage ngOnInit. start');
+
+      setTimeout(() => {
+        console.log('SvListPage ngOnInit. on setTimeout');
+        this.daoService.countMsg((rs) => {
+          console.log('SvListPage ngOnInit. countMsg done. rs=' + rs);
+          this.totalMsgCount = rs;
+        });
+      },500)
+
+      
+    });
+  }
+
 
   svStatus(svObj):void {
     console.log('svStatus. svObj=' + svObj);

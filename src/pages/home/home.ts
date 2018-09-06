@@ -7,6 +7,7 @@ import { JPush } from "@jiguang-ionic/jpush";
 import { Device } from "@ionic-native/device";
 
 import { MsgDetailPage } from '../../pages/msg-detail/msg-detail';
+import { DaoService } from '../../app/DaoService'
 
 @Component({
   selector: 'page-home',
@@ -31,11 +32,14 @@ export class HomePage {
   constructor(public navCtrl: NavController,
     public jpush: JPush,
     device: Device,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private daoService: DaoService
   ) {
 
     this.devicePlatform = device.platform;
   }
+  // end of constructor
+
 
   // ngAfterViewInit() {
   //   this.cdr.detectChanges();
@@ -61,6 +65,10 @@ export class HomePage {
         // alert("Receive notification: " + JSON.stringify(event));
 
         var notiObj = this.addNotification(content);
+        this.daoService.insertMsg(notiObj, rs => {
+          console.log('HomePage. insertMsg done');
+          
+        });
 
         this.msg = "Receive notification: \n" + notiObj.msgDetail;
         
@@ -153,7 +161,7 @@ export class HomePage {
     });
     */
   }
-  // end of constructor
+  // end of ngOnInit
 
 
   
@@ -225,5 +233,12 @@ msgDetail(msgObj):void {
 }
 
 
+saveMsg(msgObj): void {
+  console.log('saveMsg. msgObj=' + msgObj);
+
+  let sqlStr: string = '';
+  let params: any[] = [];
+
+}
 
 }

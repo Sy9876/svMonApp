@@ -85,5 +85,6 @@
     <plugin name="jpush-phonegap-plugin" spec="d:\gitRepos\jpush-phonegap-plugin">
         <variable name="APP_KEY" value="bcb0a4d53f79ed9c4cea3a5a" />
     </plugin>
+    <plugin name="cordova-sqlite-storage" spec="^2.4.0" />
     <engine name="android" spec="~7.0.0" />
 </widget>
