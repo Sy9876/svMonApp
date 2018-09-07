@@ -5,6 +5,7 @@
 </ion-header>
 
 <ion-content padding>
+  <p>当前时间：{{currentTime | date: 'y-M-d HH:mm:ss'}}</p>
   <ion-list>
     <ion-list-header>最近消息</ion-list-header>
     <ion-item *ngFor="let msgObj of msgObjList">

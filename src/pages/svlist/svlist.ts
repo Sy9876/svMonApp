@@ -39,22 +39,29 @@ export class SvListPage {
   }
 
   ngOnInit() {
+    console.log('SvListPage ngOnInit. start');
 
-    this.platform.ready().then(() => {
-      console.log('SvListPage ngOnInit. start');
-
-      setTimeout(() => {
-        console.log('SvListPage ngOnInit. on setTimeout');
-        this.daoService.countMsg((rs) => {
-          console.log('SvListPage ngOnInit. countMsg done. rs=' + rs);
-          this.totalMsgCount = rs;
-        });
-      },500)
-
-      
-    });
   }
 
+  ionViewDidLoad() {
+    console.log("svList. ionViewDidLoad");
+  }
+
+  ionViewDidEnter() {
+    console.log("svList. ionViewDidEnter");
+    this.loadSvList();
+  }
+
+
+  loadSvList(): void {
+    this.platform.ready().then(() => {
+        this.daoService.countMsg((rs) => {
+          console.log('SvListPage loadSvList. countMsg done. rs=' + rs);
+          this.totalMsgCount = rs;
+        });
+    });
+
+  }
 
   svStatus(svObj):void {
     console.log('svStatus. svObj=' + svObj);

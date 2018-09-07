@@ -1,5 +1,6 @@
 import { Component ,OnInit, ChangeDetectorRef } from '@angular/core';
 import { NavController } from 'ionic-angular';
+import { Platform } from 'ionic-angular';
 
 import { HttpClient } from '@angular/common/http';
 
@@ -19,6 +20,7 @@ export class HomePage {
   devicePlatform: string;
   sequence: number = 0;
   msg:string;
+  currentTime:Date = new Date();
 
   msgObj = {
     serverName: null,
@@ -32,11 +34,18 @@ export class HomePage {
   constructor(public navCtrl: NavController,
     public jpush: JPush,
     device: Device,
+    platform: Platform,
     private cdr: ChangeDetectorRef,
     private daoService: DaoService
   ) {
 
-    this.devicePlatform = device.platform;
+    if(platform.is('android')) {
+      this.devicePlatform = 'Android';
+    }
+    else {
+      this.devicePlatform = '';
+    }
+    
   }
   // end of constructor
 
@@ -46,6 +55,12 @@ export class HomePage {
   // }
 
   ngOnInit(){
+
+    // update currentTime
+    setInterval(()=>{
+      this.currentTime = new Date();
+    }, 1000);
+
     /**
      * 收到平台推送
      */
@@ -67,7 +82,7 @@ export class HomePage {
         var notiObj = this.addNotification(content);
         this.daoService.insertMsg(notiObj, rs => {
           console.log('HomePage. insertMsg done');
-          
+
         });
 
         this.msg = "Receive notification: \n" + notiObj.msgDetail;
@@ -160,11 +175,22 @@ export class HomePage {
       msgDetail: "msgDetail"
     });
     */
+
+
   }
   // end of ngOnInit
 
 
-  
+  ionViewDidLoad() {
+    console.log('home. ionViewDidLoad. selectMsg.');
+    this.daoService.selectMsg(rs=>{
+      console.log('daoService.selectMsg done.');
+    });
+  }
+
+
+
+
   addNotification(content: string) : any {
     // serverName: 
     // reportDate: 

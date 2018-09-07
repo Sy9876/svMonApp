@@ -3,28 +3,140 @@ import { Platform } from 'ionic-angular';
 import { SQLite, SQLiteObject } from '@ionic-native/sqlite';
 
 @Injectable()
+// {
+//   providedIn: 'root'
+// }
 export class DaoService {
 
+  DB_NAME:string = 'svmon.db';
+  DB_CONFIG:any = {name: 'svmon.db', location: 'default'};
+
   db: SQLiteObject = null;
+  dbJs: any = null;
+  sqlitePlugin = window['sqlitePlugin'];
+  devicePlatform: string;
 
-  constructor(platform: Platform,
-    private sqlite: SQLite) {
+  constructor(public platform: Platform,
+    public sqlite: SQLite) {
 
-   platform.ready().then(() => {
-     console.log('DaoService start. on platform.ready. open sqlite db.');
-     
-     this.createSqliteDb();
+    if(platform.is('android')) {
+      this.devicePlatform = 'Android';
+
+      this.openDb();
+
+    }
+    else {
+      this.devicePlatform = '';
+    }
+
+    
+
+ }
+
+  /**
+   * 打开db，保存db handler，如果需要则建表
+   */
+  openDb(): void {
+
+    if (this.devicePlatform != "Android") {
+      return;
+    }
+    
+    this.platform.ready().then(() => {
+    console.log('DaoService start. on platform.ready. open sqlite db.');
+    
+    //  this.createSqliteDb();
     // this.selfTest();
-     
-   });
+
+    if(this.dbJs!=null) {
+      return;
+    }
+
+    if(this.sqlitePlugin!=null) {
+      // 打开DB
+      this.sqlitePlugin.openDatabase(this.DB_CONFIG, db => {
+        console.log('sqlitePlugin.openDatabase  ok. db=' + db);
+
+        let sqlStr = `SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table' and name='mon_msg'`;
+        db.executeSql(sqlStr, [], rs => {
+          let cnt = rs.rows.item(0).cnt;
+          console.log('executeSql  SELECT COUNT(*)  success. cnt=' + cnt);
+          if(cnt==0) {
+            // create table
+            this.createTable(db, (err, rs)=>{
+              if(err==null) {
+                // 保存db handler
+                console.log('save db to dbJs');
+                this.dbJs = db;
+              }
+            });
+          }
+          else {
+            console.log('save db to dbJs 2');
+            this.dbJs = db;
+          }
+        },
+        err => {
+          console.log('executeSql  SELECT COUNT(*)  err');
+        });
+
+      },
+      err => {
+        console.log('sqlitePlugin.openDatabase  err');
+      });
+    }
+
+    });
+  }
+
+
+ /**
+  * 
+  */
+ createTable(dbJs, cb): void {
+  if (this.devicePlatform != "Android") {
+    return;
+  }
+   let createTableSql = `
+    create table if not exists mon_msg (
+      id integer primary key autoincrement,
+      serverName varchar(32),
+      reportTimestamp integer,
+      status varchar(10),
+      msgShort varchar(100),
+      msgDetail varchar(65535)
+    );
+   `;
+
+    console.log('createSqliteDb. 210 do executeSql. ' + createTableSql);
+
+    dbJs.executeSql(createTableSql, [], rs=>{
+      console.log('300 Executed createDbSql SQL done.');
+      cb();
+    },
+    e=>{
+      console.log('400 Executed createDbSql SQL error.');
+      console.log('401 Executed createDbSql SQL error. e.rows.item(0)=' + e.rows.item(0));
+      console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e));
+      console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e.rows.item(0)));
+      this.showObj(e);
+    });
+
  }
 
- getDbObj(): SQLiteObject {
-    return this.db;
- }
 
- insertMsg(msgObj:any, cb: Function): void {
+
+ /**
+  * 
+  * @param msgObj 
+  * @param cb 
+  */
+ async insertMsg(msgObj:any, cb: Function): Promise<any> {
   console.log('insertMsg');
+
+  if (this.devicePlatform != "Android") {
+    return;
+  }
 
   let sqlStr = 
     'insert into mon_msg (serverName, reportTimestamp, status, msgShort, msgDetail) '
@@ -55,121 +167,208 @@ export class DaoService {
   params.push(msgObj.msgShort);
   params.push(msgObj.msgDetail);
 
-  this.db.executeSql(sqlStr, params).then((rs) => {
-    console.log('Executed sqlStr SQL done.');
+  console.log('insertMsg. waitDbPrepared');
+  let xxx = await this.waitDbPrepared();
+
+  console.log('insertMsg. executeSql insert');
+  this.dbJs.executeSql(sqlStr, params, rs=>{
+    console.log('insertMsg. executeSql insert success');
     cb(rs);
-  })
-  .catch(e => {
-    console.log(e);
-    console.log('insertMsg. showObj e:');
-    this.showObj(e);
-    console.log('insertMsg. showObj e.rows.item(0):');
-    this.showObj(e.rows.item(0));
+  },
+  e=>{
+    console.log('insertMsg. executeSql insert err');
+
   });
+  // this.dbJs.executeSql(sqlStr, params).then((rs) => {
+  //   console.log('Executed sqlStr SQL done.');
+  //   cb(rs);
+  // })
+  // .catch(e => {
+  //   console.log(e);
+  //   console.log('insertMsg. showObj e:');
+  //   this.showObj(e);
+  //   console.log('insertMsg. showObj e.rows.item(0):');
+  //   this.showObj(e.rows.item(0));
+  // });
+  }
 
- }
 
- countMsg(cb: Function): void {
+ /**
+  * 
+  * @param cb 
+  */
+ async countMsg(cb: Function): Promise<any> {
   console.log('countMsg');
+
+  if (this.devicePlatform != "Android") {
+    return;
+  }
 
   let sqlStr = 'select count(1) as cnt from mon_msg';
 
-  console.log('this.db is: ' + this.db);
-
-  this.db.executeSql(sqlStr)
-  .then((rs) => {
-    console.log('Executed sqlStr SQL done. ' + rs.rows.item(0));
-    cb(rs.rows.item(0));
-  })
-  .catch(e => {
-    console.log('Executed sqlStr SQL error.')
-
-    this.showObj(e.rows.item(0)['cnt']);
-
-
-    // console.log(e.message)
-    cb(e.rows.item(0)['cnt']);
-
-    
-
+  console.log('countMsg. waitDbPrepared');
+  if(this.dbJs==null) {
+    await this.waitDbPrepared();
+  }
+  console.log('countMsg. executeSql select. this.dbJs=' + this.dbJs);
+  this.dbJs.executeSql(sqlStr, [], rs=>{
+    console.log('countMsg. executeSql select success');
+    cb(rs.rows.item(0)['cnt']);
+  },
+  e=>{
+    console.log('countMsg. executeSql select err');
 
   });
 
+
+
+  // this.sqlite.create({
+  //   name: this.DB_NAME,
+  //   location: 'default'
+  // })
+  // .then((db: SQLiteObject) => {
+  //   db.executeSql(sqlStr)
+  //   .then((rs) => {
+  //     console.log('Executed sqlStr SQL done. ' + rs.rows.item(0));
+  //     cb(rs.rows.item(0));
+  //   })
+  //   .catch(e => {
+  //     console.log('Executed sqlStr SQL error.')
+
+  //     this.showObj(e.rows.item(0)['cnt']);
+
+  //     // console.log(e.message)
+  //     cb(e.rows.item(0)['cnt']);
+  //   });
+  // })
+  // .catch(e => console.log(e));
+
  }
 
+
+
+ /**
+  * 
+  * @param cb 
+  */
  selectMsg(cb: Function): void {
   console.log('selectMsg');
+
+  if (this.devicePlatform != "Android") {
+    return;
+  }
 
   let sqlStr = `select id, serverName, reportTimestamp, status, msgShort, msgDetail
     from mon_msg
     order by reportTimestamp desc
     `;
 
-  this.db.executeSql(sqlStr)
-  .then((rs) => {
-    console.log('Executed sqlStr SQL done.');
-    cb(rs);
+  this.sqlite.create({
+    name: this.DB_NAME,
+    location: 'default'
+  })
+  .then((db: SQLiteObject) => {
+    db.executeSql(sqlStr)
+    .then((rs) => {
+      console.log('Executed sqlStr SQL done.');
+      cb(rs);
+    })
+    .catch(e => console.log(e));
   })
   .catch(e => console.log(e));
 
  }
 
- createSqliteDb(): void {
-
-   let createDbSql = `
-    create table if not exists mon_msg (
-      id integer primary key autoincrement,
-      serverName varchar(32),
-      reportTimestamp integer,
-      status varchar(10),
-      msgShort varchar(100),
-      msgDetail varchar(65535)
-    );
-   `;
-
-   createDbSql = `SELECT COUNT(*) FROM sqlite_master WHERE type='table'`
-
-   console.log('createSqliteDb. 100 sqlite.create start.');
-   this.sqlite.create({
-     name: 'svmon.db',
-     location: 'default'
-   })
-    .then((db: SQLiteObject) => {
-
-      console.log('createSqliteDb. 200 sqlite.create done. got db object. do executeSql');
-      console.log('createSqliteDb. 210 do executeSql. ' + createDbSql);
-      console.log('createSqliteDb. 220 db：' + db);
-
-      db.executeSql(createDbSql)
-        .then(() => {
-          console.log('300 Executed createDbSql SQL done.');
-          this.db = db;
-        })
-        .catch(e => {
-          this.db = db;
-          console.log('400 Executed createDbSql SQL error.');
-          console.log('401 Executed createDbSql SQL error. e.rows.item(0)=' + e.rows.item(0));
-          console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e));
-          console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e.rows.item(0)));
-
-          // for(var p in e) {
-          //   console.log('410 p: ' + p + ' v: ' + e[p]);
-          // }
-          this.showObj(e);
-          // console.log(e.toString())
-        });
 
 
-    })
-    .catch(e => {
-      console.log('500 createSqliteDb. sqlite.create error.');
-      console.log(e)
-    });
- }
+//  /**
+//   * 
+//   */
+//  async createSqliteDb(): Promise<any> {
+
+//   let createDbSql = `
+//    create table if not exists mon_msg (
+//      id integer primary key autoincrement,
+//      serverName varchar(32),
+//      reportTimestamp integer,
+//      status varchar(10),
+//      msgShort varchar(100),
+//      msgDetail varchar(65535)
+//    );
+//   `;
+
+//   return new Promise((resolve, reject)=> {
+//     console.log('create table mon_msg. 100 sqlite.create start.');
+//     this.dbJs.executeSql(createDbSql, [], rs=>{
+//       console.log('200 create mon_msg SQL done.');
+//       resolve(rs);
+//     },
+//     err => {
+//       console.log('300 create mon_msg SQLL error. json=' + JSON.stringify(err));
+//       reject(err);
+//     });
+//   })
+
+// }
+
+ /**
+  * 
+  */
+//  createSqliteDb(): void {
+
+//    let createDbSql = `
+//     create table if not exists mon_msg (
+//       id integer primary key autoincrement,
+//       serverName varchar(32),
+//       reportTimestamp integer,
+//       status varchar(10),
+//       msgShort varchar(100),
+//       msgDetail varchar(65535)
+//     );
+//    `;
+
+//    createDbSql = `SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table' and name='mon_msg'`
+
+//    console.log('createSqliteDb. 100 sqlite.create start.');
+//    this.sqlite.create({
+//      name: this.DB_NAME,
+//      location: 'default'
+//    })
+//     .then((db: SQLiteObject) => {
+
+//       console.log('createSqliteDb. 200 sqlite.create done. got db object. do executeSql');
+//       console.log('createSqliteDb. 210 do executeSql. ' + createDbSql);
+//       console.log('createSqliteDb. 220 db：' + db);
+
+//       db.executeSql(createDbSql)
+//         .then((rs) => {
+//           console.log('300 Executed createDbSql SQL done.');
+//         })
+//         .catch(e => {
+//           console.log('400 Executed createDbSql SQL error.');
+//           console.log('401 Executed createDbSql SQL error. e.rows.item(0)=' + e.rows.item(0));
+//           console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e));
+//           console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e.rows.item(0)));
+
+//           this.showObj(e);
+
+//         });
+
+
+//     })
+//     .catch(e => {
+//       console.log('500 createSqliteDb. sqlite.create error.');
+//       console.log(e)
+//     });
+//  }
 
 
  
  selfTest(): void {
+
+  if (this.devicePlatform != "Android") {
+    return;
+  }
 
   console.log('selfTest. 100 sqlite.selfTest start.');
   this.sqlite.selfTest()
@@ -196,4 +395,21 @@ export class DaoService {
     this.showObj(obj[p]);
   }
  }
+
+ async waitDbPrepared():Promise<any> {
+    let timeoutMS = 0;
+    if(this.dbJs==null) {
+      timeoutMS=500;
+    }
+    let p = new Promise((resolve, reject)=>{
+      setTimeout(()=>{
+        console.log('waitDbPrepared resolve')
+        resolve();
+      },timeoutMS);
+    });
+    return p;
+
+ }
+
+
 }

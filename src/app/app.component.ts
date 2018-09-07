@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
+import { Device } from "@ionic-native/device";
 
 import { TabsPage } from '../pages/tabs/tabs';
 
@@ -15,6 +16,7 @@ export class MyApp {
   rootPage:any = TabsPage;
 
   constructor(platform: Platform, statusBar: StatusBar,
+     device: Device,
      splashScreen: SplashScreen, jpush: JPush,
      private sqlite: SQLite) {
 
@@ -25,13 +27,23 @@ export class MyApp {
       statusBar.styleDefault();
       splashScreen.hide();
 
-      console.log('MyApp  jpush.init');
-      jpush.init();
-      console.log('MyApp  jpush.setDebugMode');
-      jpush.setDebugMode(true);
-      console.log('MyApp  done');
+      if(platform.is('android') || platform.is('ios')) {
+        console.log('MyApp  jpush.init');
+        jpush.init();
+        console.log('MyApp  jpush.setDebugMode');
+        jpush.setDebugMode(true);
+        console.log('MyApp  done');
+      }
 
     });
   }
+
+  // 声明成async也不能阻止子组件home的加载
+  // async ngOnInit() {
+  //   console.log('app ngOnInit setTimeout 3000 start.');
+  //   await setTimeout(() => {
+  //     console.log('setTimeout 3000 done.');
+  //   }, 3000);
+  // }
 
 }
