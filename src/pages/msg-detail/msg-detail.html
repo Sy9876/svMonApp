@@ -14,8 +14,8 @@
 
 <ion-content padding>
   <p>服务器: {{msgObj.serverName}}</p>
-  <p>日期: {{msgObj.reportDate | date: 'y-M-d HH:mm:ss'}}</p>
+  <p>报告日期: {{msgObj.reportDate | date: 'y-M-d HH:mm:ss'}}</p>
   <p>状态: {{msgObj.status}}</p>
-  <p>消息详细: </p>
-  <textarea style="width:100%; height:60%;font-family:'MS Courier New',Courier,Serif;">{{msgObj.msgDetail}}</textarea>
+  <textarea disabled="disabled" style="width:100%; height:60%;font-family:'MS Courier New',Courier,Serif;">{{msgObj.msgDetail}}</textarea>
+  <button ion-button round (click)="deleteMsg(msgObj)">删除消息</button>
 </ion-content>

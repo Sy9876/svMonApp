@@ -41,7 +41,7 @@ export class DaoService {
     if (this.devicePlatform != "Android") {
       return;
     }
-    
+
     this.platform.ready().then(() => {
     console.log('DaoService start. on platform.ready. open sqlite db.');
     
@@ -124,7 +124,51 @@ export class DaoService {
 
  }
 
+ convertToMsgObj(record) {
+    console.log('convertToMsgObj start');
+    let msgObj:any = {};
+    msgObj.id = record.id;
+    msgObj.serverName = record.serverName;
+    let reportTimestamp = record.reportTimestamp;
+    msgObj.reportDate = new Date(reportTimestamp);
+    console.log('convertToMsgObj reportTimestamp=' + reportTimestamp + "  ->  " + msgObj.reportDate);
+    msgObj.status = record.status;
+    msgObj.msgShort = record.msgShort;
+    msgObj.msgDetail = record.msgDetail;
 
+    console.log('convertToMsgObj end');
+    return msgObj;
+ }
+
+ convertMsgObjToHostParam(msgObj) {
+  let params: any = [];
+  params.push(msgObj.serverName);
+  if(msgObj.reportDate) {
+    // 保存时间戳
+    let x = typeof(msgObj.reportDate);
+    console.log('insertMsg. typeof msgObj.reportDate is :' + x);
+    console.log('insertMsg. msgObj.reportDate is :' + msgObj.reportDate);
+    let ts: number = 0;
+    if(x=='string') {
+      let d = new Date(msgObj.reportDate);
+      console.log('insertMsg. d :' + d);
+      ts = d.getTime();
+    }
+    else {
+      ts = msgObj.reportDate.getTime();
+    }
+    console.log('convertMsgObjToHostParam.  ' + msgObj.reportDate + '  ->  ' + ts);
+    params.push(ts);
+  }
+  else {
+    params.push(null);
+  }
+  params.push(msgObj.status);
+  params.push(msgObj.msgShort);
+  params.push(msgObj.msgDetail);
+
+  return params;
+ }
 
  /**
   * 
@@ -142,30 +186,8 @@ export class DaoService {
     'insert into mon_msg (serverName, reportTimestamp, status, msgShort, msgDetail) '
     + ' values (?, ?, ?, ?, ?);'
     ;
-  let params: any = [];
-  params.push(msgObj.serverName);
-  if(msgObj.reportDate) {
-    // 保存时间戳
-    let x = typeof(msgObj.reportDate);
-    console.log('insertMsg. typeof msgObj.reportDate is :' + x);
-    console.log('insertMsg. msgObj.reportDate is :' + msgObj.reportDate);
-    let ts: number = 0;
-    if(x=='string') {
-      let d = new Date(x);
-      ts = d.getTime();
-    }
-    else {
-      ts = msgObj.reportDate.getTime();
-    }
-    console.log('insertMsg. ts is :' + ts);
-    params.push(ts);
-  }
-  else {
-    params.push(null);
-  }
-  params.push(msgObj.status);
-  params.push(msgObj.msgShort);
-  params.push(msgObj.msgDetail);
+
+  let params = this.convertMsgObjToHostParam(msgObj);
 
   console.log('insertMsg. waitDbPrepared');
   let xxx = await this.waitDbPrepared();
@@ -173,24 +195,43 @@ export class DaoService {
   console.log('insertMsg. executeSql insert');
   this.dbJs.executeSql(sqlStr, params, rs=>{
     console.log('insertMsg. executeSql insert success');
-    cb(rs);
+
+    // 获取自增id
+    this.getAutoIncreaseId('mon_msg', id=>{
+      cb(id);
+    })
+    
   },
   e=>{
     console.log('insertMsg. executeSql insert err');
 
   });
-  // this.dbJs.executeSql(sqlStr, params).then((rs) => {
-  //   console.log('Executed sqlStr SQL done.');
-  //   cb(rs);
-  // })
-  // .catch(e => {
-  //   console.log(e);
-  //   console.log('insertMsg. showObj e:');
-  //   this.showObj(e);
-  //   console.log('insertMsg. showObj e.rows.item(0):');
-  //   this.showObj(e.rows.item(0));
-  // });
+
   }
+
+
+ /**
+  * 获取自增id
+  * @param cb 
+  */
+ getAutoIncreaseId(tableName:string, cb: Function): void {
+  console.log('getAutoIncreaseId');
+
+  let sqlStr = 'select last_insert_rowid() as id from from ' + tableName;
+
+  console.log('getAutoIncreaseId. executeSql ' + sqlStr);
+  this.dbJs.executeSql(sqlStr, [], rs=>{
+    console.log('getAutoIncreaseId. executeSql select last_insert_rowid success');
+    cb(rs.rows.item(0)['id']);
+  },
+  e=>{
+    console.log('getAutoIncreaseId. executeSql select last_insert_rowid err');
+
+  });
+
+ }
+
+
 
 
  /**
@@ -220,30 +261,72 @@ export class DaoService {
 
   });
 
+ }
 
 
-  // this.sqlite.create({
-  //   name: this.DB_NAME,
-  //   location: 'default'
-  // })
-  // .then((db: SQLiteObject) => {
-  //   db.executeSql(sqlStr)
-  //   .then((rs) => {
-  //     console.log('Executed sqlStr SQL done. ' + rs.rows.item(0));
-  //     cb(rs.rows.item(0));
-  //   })
-  //   .catch(e => {
-  //     console.log('Executed sqlStr SQL error.')
+ 
 
-  //     this.showObj(e.rows.item(0)['cnt']);
+ /**
+  * 删除一条记录
+  * @param cb 
+  */
+ async deleteMsg(msgObj:any, cb: Function): Promise<any> {
+  console.log('deleteMsg. id=' + msgObj.id);
+  if(msgObj.id==undefined) {
+    return;
+  }
+  if (this.devicePlatform != "Android") {
+    return;
+  }
 
-  //     // console.log(e.message)
-  //     cb(e.rows.item(0)['cnt']);
-  //   });
-  // })
-  // .catch(e => console.log(e));
+  let sqlStr = 'delete from mon_msg where id = ?';
+
+  console.log('deleteMsg. waitDbPrepared');
+  if(this.dbJs==null) {
+    await this.waitDbPrepared();
+  }
+  console.log('deleteMsg. executeSql delete. this.dbJs=' + this.dbJs);
+  this.dbJs.executeSql(sqlStr, [msgObj.id], rs=>{
+    console.log('deleteMsg. executeSql delete success');
+    cb();
+  },
+  e=>{
+    console.log('deleteMsg. executeSql delete err');
+
+  });
 
  }
+
+
+ /**
+  * delete mon_msg
+  * @param cb 
+  */
+ async clearDb(cb: Function): Promise<any> {
+  console.log('clearDb');
+
+  if (this.devicePlatform != "Android") {
+    return;
+  }
+
+  let sqlStr = 'delete from mon_msg';
+
+  console.log('clearDb. waitDbPrepared');
+  if(this.dbJs==null) {
+    await this.waitDbPrepared();
+  }
+  console.log('clearDb. executeSql delete. this.dbJs=' + this.dbJs);
+  this.dbJs.executeSql(sqlStr, [], rs=>{
+    console.log('clearDb. executeSql delete success');
+    cb();
+  },
+  e=>{
+    console.log('countMsg. executeSql delete err');
+
+  });
+
+}
+
 
 
 
@@ -251,7 +334,7 @@ export class DaoService {
   * 
   * @param cb 
   */
- selectMsg(cb: Function): void {
+ async selectMsg(cb: Function) {
   console.log('selectMsg');
 
   if (this.devicePlatform != "Android") {
@@ -261,26 +344,59 @@ export class DaoService {
   let sqlStr = `select id, serverName, reportTimestamp, status, msgShort, msgDetail
     from mon_msg
     order by reportTimestamp desc
+    limit 10
     `;
 
-  this.sqlite.create({
-    name: this.DB_NAME,
-    location: 'default'
-  })
-  .then((db: SQLiteObject) => {
-    db.executeSql(sqlStr)
-    .then((rs) => {
-      console.log('Executed sqlStr SQL done.');
-      cb(rs);
-    })
-    .catch(e => console.log(e));
-  })
-  .catch(e => console.log(e));
+  console.log('selectMsg. waitDbPrepared');
+  let xxx = await this.waitDbPrepared();
+
+  console.log('selectMsg. executeSql select limit 10');
+  this.dbJs.executeSql(sqlStr, [], rs=>{
+    console.log('selectMsg. executeSql select success');
+    cb(rs);
+  },
+  e=>{
+    console.log('selectMsg. executeSql select err');
+
+  });
 
  }
 
 
 
+
+
+ /**
+  * 
+  * @param cb 
+  */
+ async countMsgBySv(cb: Function) {
+  console.log('countMsgBySv');
+
+  if (this.devicePlatform != "Android") {
+    return;
+  }
+
+  let sqlStr = `select serverName, count(1) as cnt from mon_msg group by serverName`;
+
+  console.log('countMsgBySv. waitDbPrepared');
+  let xxx = await this.waitDbPrepared();
+
+  console.log('countMsgBySv. executeSql select count group by serverName');
+  this.dbJs.executeSql(sqlStr, [], rs=>{
+    console.log('countMsgBySv. executeSql select count group by serverName success');
+    cb(rs);
+  },
+  e=>{
+    console.log('countMsgBySv. executeSql select count group by serverName err');
+
+  });
+
+ }
+
+
+
+ 
 //  /**
 //   * 
 //   */

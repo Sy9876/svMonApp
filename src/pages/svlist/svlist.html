@@ -10,9 +10,9 @@
   <ion-list>
     <ion-list-header>服务器状态  消息总数 {{totalMsgCount}}</ion-list-header>
     <ion-item *ngFor="let svObj of svObjList">
-      <ion-icon name="ionic" item-start></ion-icon>
-      服务器名 {{svObj.serverName}}， 描述 {{svObj.serverDesc}}， 状态 {{svObj.serverStatus}}
-      <button type="button" (click)="svStatus(svObj)">详细</button>
+      <!-- <ion-icon name="ionic" item-start></ion-icon> -->
+      服务器: {{svObj.serverName}}， 消息数 {{svObj.msgCnt}}
+      <button ion-button color="dark" (click)="svStatus(svObj)">详细</button>
     </ion-item>
   </ion-list>
 </ion-content>

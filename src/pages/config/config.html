@@ -7,7 +7,30 @@
 </ion-header>
 
 <ion-content padding>
-  <h1>待开发</h1>
-  <p>jpush registrationId: {{registrationId}}</p>
-  <button ion-button color="dark" (click)="showRegId()">显示jpush注册id</button>
+
+  <ion-list>
+    <ion-list-header><h1>推送信息</h1></ion-list-header>
+    <ion-item>
+        <p>jpush registrationId: {{registrationId}}</p>
+        <p><button ion-button item-end color="dark" (click)="showRegId()">显示jpush注册id</button></p>
+    </ion-item>
+    <ion-item>
+        <p>用户分组: </p>
+        <button ion-button item-end color="dark" (click)="showGroup()">显示用户分组</button>
+    </ion-item>
+  </ion-list>
+
+  <ion-list>
+    <ion-list-header><h1>sqlite信息</h1></ion-list-header>
+    <ion-item>
+        <p>记录数: {{totalMsgCount}} </p>
+        <button ion-button item-end color="dark" (click)="getTotalCount()">获取记录数</button>
+    </ion-item>
+    <ion-item>
+        <button ion-button color="danger" (click)="clearDb()">清空sqlite db</button>
+    </ion-item>
+
+
+  </ion-list>
+
 </ion-content>

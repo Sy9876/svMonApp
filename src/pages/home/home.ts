@@ -23,6 +23,7 @@ export class HomePage {
   currentTime:Date = new Date();
 
   msgObj = {
+    id: null,
     serverName: null,
     reportDate: null,
     status: null,
@@ -79,16 +80,23 @@ export class HomePage {
         console.log('HomePage. on jpush.receiveNotification devicePlatform=' + this.devicePlatform);
         // alert("Receive notification: " + JSON.stringify(event));
 
-        var notiObj = this.addNotification(content);
-        this.daoService.insertMsg(notiObj, rs => {
-          console.log('HomePage. insertMsg done');
+        // 转换为obj
+        var notiObj = JSON.parse(content);
 
+        // 插入DB
+        this.daoService.insertMsg(notiObj, id => {
+          console.log('HomePage. insertMsg done. id=' + id);
+
+          notiObj.id = id;
+          
+          // 加入页面列表
+          this.addNotificationObj(notiObj);
+
+          this.msg = "Receive notification: \n" + notiObj.msgDetail;
+          
+          console.log('HomePage. on jpush.receiveNotification event=' + this.msg);
         });
 
-        this.msg = "Receive notification: \n" + notiObj.msgDetail;
-        
-        console.log('HomePage. on jpush.receiveNotification event=' + this.msg);
-        
       },
       false
     );
@@ -124,20 +132,27 @@ export class HomePage {
       false
     );
 
+    // 本地消息
     document.addEventListener(
       "jpush.receiveLocalNotification",
       (event: any) => {
 
         console.log('HomePage. on jpush.receiveLocalNotification');
 
-        // iOS(*,9) Only , iOS(10,*) 将在 jpush.openNotification 和 jpush.receiveNotification 中触发。
-        var content;
-        if (this.devicePlatform == "Android") {
-        } else {
-          content = event.content;
-        }
+        // // iOS(*,9) Only , iOS(10,*) 将在 jpush.openNotification 和 jpush.receiveNotification 中触发。
+        // var content;
+        // if (this.devicePlatform == "Android") {
+        // } else {
+        //   content = event.content;
+        // }
         
-        var notiObj = this.addNotification(content);
+        // // 转换为obj
+        // var notiObj = JSON.parse(content);
+
+        // // 插入DB
+
+        // // 加入页面列表
+        // this.addNotificationObj(notiObj);
         
         // alert("receive local notification: " + JSON.stringify(event));
         this.msg = "receive local notification: " + JSON.stringify(event);
@@ -181,13 +196,25 @@ export class HomePage {
   // end of ngOnInit
 
 
-  ionViewDidLoad() {
-    console.log('home. ionViewDidLoad. selectMsg.');
+  ionViewDidEnter() {
+    console.log('home. ionViewDidEnter. selectMsg.');
     this.daoService.selectMsg(rs=>{
       console.log('daoService.selectMsg done.');
+      let cnt = 0;
+      if(rs && rs.rows) {
+        cnt = rs.rows.length;
+      }
+      console.log('daoService.selectMsg done.  rs.rows.length=' + cnt);
+
+      this.msgObjList=[];
+      for(var i=0; i<rs.rows.length; i++) {
+        let record = rs.rows.item(i);
+        let msgObj = this.daoService.convertToMsgObj(record);
+
+        this.addNotificationObj(msgObj, true);
+      }
     });
   }
-
 
 
 
@@ -205,32 +232,31 @@ export class HomePage {
     return notiObj;
 }
 
-addNotificationObj(notiObj: any) : any {
+addNotificationObj(notiObj: any, isPush=false) : any {
   // 只保存100条
   if(this.msgObjList.length>100) {
     this.msgObjList.pop();
   }
 
-  // 插入列表头部
-  // this.msgObjList.push(notiObj);
-
-  // setTimeout(() => {
-    // console.log('setTimeout');
+  if(isPush) {
+    // 插入列表尾部
+    this.msgObjList.push(notiObj);
+  }
+  else {
+    // 插入列表头部
     this.msgObjList.splice(0, 0, notiObj);
-    // this.cdr.markForCheck();
-
-    // 需要使用这个来刷新页面，否则angular检测不到数组变化。
-    this.cdr.detectChanges();
-  // }, 200)
+  }
   
+  // 需要使用这个来刷新页面，否则angular检测不到数组变化。
+  this.cdr.detectChanges();
 
-  this.msgObj.serverName = notiObj.serverName;
-  this.msgObj.reportDate = notiObj.reportDate;
-  this.msgObj.status = notiObj.status;
-  this.msgObj.msgShort = notiObj.msgShort;
-  this.msgObj.msgDetail = notiObj.msgDetail;
+  // this.msgObj.serverName = notiObj.serverName;
+  // this.msgObj.reportDate = notiObj.reportDate;
+  // this.msgObj.status = notiObj.status;
+  // this.msgObj.msgShort = notiObj.msgShort;
+  // this.msgObj.msgDetail = notiObj.msgDetail;
 
-  return notiObj;
+  // return notiObj;
 }
 
 getRegistrationID() {

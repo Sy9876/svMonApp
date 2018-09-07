@@ -9,12 +9,11 @@
   <ion-list>
     <ion-list-header>最近消息</ion-list-header>
     <ion-item *ngFor="let msgObj of msgObjList">
-        <ion-icon *ngIf="msgObj.status === 'OK'" name="checkmark-circle-outline"></ion-icon>
-        <ion-icon *ngIf="msgObj.status !== 'OK'" name="close-circle"></ion-icon>
-        &nbsp;{{msgObj.serverName}} &nbsp;&nbsp; {{msgObj.msgShort}}
-        <p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {{msgObj.reportDate | date: 'y-M-d HH:mm'}} &nbsp;&nbsp;
-          <button type="button" (click)="msgDetail(msgObj)"><ion-icon name="arrow-dropright"></ion-icon></button>
-        </p>
+        <ion-icon *ngIf="msgObj.status === 'OK'" name="checkmark-circle-outline" item-start></ion-icon>
+        <ion-icon *ngIf="msgObj.status !== 'OK'" name="close-circle" item-start></ion-icon>
+        <p>{{msgObj.serverName}} &nbsp;&nbsp; {{msgObj.msgShort}}</p>
+        <p>{{msgObj.reportDate | date: 'y-M-d HH:mm'}}</p>
+        <button ion-button round item-end (click)="msgDetail(msgObj)">详细</button>
     </ion-item>
   </ion-list>
 </ion-content>
