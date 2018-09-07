@@ -1,8 +1,6 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, } from '@angular/core';
 import { NavController, LoadingController } from 'ionic-angular';
 import { Platform } from 'ionic-angular';
-
-import { HttpClient } from '@angular/common/http';
 
 import { SvDetailPage } from '../sv-detail/sv-detail';
 import { DaoService } from '../../app/DaoService'
@@ -35,23 +33,21 @@ export class SvListPage {
   constructor(public navCtrl: NavController, 
     public loadingCtrl: LoadingController,
     public platform: Platform,
-    public http: HttpClient, 
-    private cdr: ChangeDetectorRef,
     private daoService: DaoService) {
 
   }
 
   ngOnInit() {
-    console.log('SvListPage ngOnInit. start');
+    // console.log('SvListPage ngOnInit. start');
 
   }
 
   ionViewDidLoad() {
-    console.log("svList. ionViewDidLoad");
+    // console.log("svList. ionViewDidLoad");
   }
 
   ionViewDidEnter() {
-    console.log("svList. ionViewDidEnter");
+    // console.log("svList. ionViewDidEnter");
     this.loadSvList();
   }
 

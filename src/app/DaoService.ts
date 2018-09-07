@@ -66,13 +66,13 @@ export class DaoService {
             this.createTable(db, (err, rs)=>{
               if(err==null) {
                 // 保存db handler
-                console.log('save db to dbJs');
+                // console.log('save db to dbJs');
                 this.dbJs = db;
               }
             });
           }
           else {
-            console.log('save db to dbJs 2');
+            // console.log('save db to dbJs 2');
             this.dbJs = db;
           }
         },
@@ -116,27 +116,27 @@ export class DaoService {
     },
     e=>{
       console.log('400 Executed createDbSql SQL error.');
-      console.log('401 Executed createDbSql SQL error. e.rows.item(0)=' + e.rows.item(0));
-      console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e));
-      console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e.rows.item(0)));
-      this.showObj(e);
+      // console.log('401 Executed createDbSql SQL error. e.rows.item(0)=' + e.rows.item(0));
+      // console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e));
+      // console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e.rows.item(0)));
+      // this.showObj(e);
     });
 
  }
 
  convertToMsgObj(record) {
-    console.log('convertToMsgObj start');
+    // console.log('convertToMsgObj start');
     let msgObj:any = {};
     msgObj.id = record.id;
     msgObj.serverName = record.serverName;
     let reportTimestamp = record.reportTimestamp;
     msgObj.reportDate = new Date(reportTimestamp);
-    console.log('convertToMsgObj reportTimestamp=' + reportTimestamp + "  ->  " + msgObj.reportDate);
+    // console.log('convertToMsgObj reportTimestamp=' + reportTimestamp + "  ->  " + msgObj.reportDate);
     msgObj.status = record.status;
     msgObj.msgShort = record.msgShort;
     msgObj.msgDetail = record.msgDetail;
 
-    console.log('convertToMsgObj end');
+    // console.log('convertToMsgObj end');
     return msgObj;
  }
 
@@ -146,18 +146,18 @@ export class DaoService {
   if(msgObj.reportDate) {
     // 保存时间戳
     let x = typeof(msgObj.reportDate);
-    console.log('insertMsg. typeof msgObj.reportDate is :' + x);
-    console.log('insertMsg. msgObj.reportDate is :' + msgObj.reportDate);
+    // console.log('insertMsg. typeof msgObj.reportDate is :' + x);
+    // console.log('insertMsg. msgObj.reportDate is :' + msgObj.reportDate);
     let ts: number = 0;
     if(x=='string') {
       let d = new Date(msgObj.reportDate);
-      console.log('insertMsg. d :' + d);
+      // console.log('insertMsg. d :' + d);
       ts = d.getTime();
     }
     else {
       ts = msgObj.reportDate.getTime();
     }
-    console.log('convertMsgObjToHostParam.  ' + msgObj.reportDate + '  ->  ' + ts);
+    // console.log('convertMsgObjToHostParam.  ' + msgObj.reportDate + '  ->  ' + ts);
     params.push(ts);
   }
   else {
@@ -190,7 +190,7 @@ export class DaoService {
   let params = this.convertMsgObjToHostParam(msgObj);
 
   console.log('insertMsg. waitDbPrepared');
-  let xxx = await this.waitDbPrepared();
+  await this.waitDbPrepared();
 
   console.log('insertMsg. executeSql insert');
   this.dbJs.executeSql(sqlStr, params, rs=>{
@@ -348,7 +348,7 @@ export class DaoService {
     `;
 
   console.log('selectMsg. waitDbPrepared');
-  let xxx = await this.waitDbPrepared();
+  await this.waitDbPrepared();
 
   console.log('selectMsg. executeSql select limit 10');
   this.dbJs.executeSql(sqlStr, [], rs=>{
@@ -380,7 +380,7 @@ export class DaoService {
   let sqlStr = `select serverName, count(1) as cnt from mon_msg group by serverName`;
 
   console.log('countMsgBySv. waitDbPrepared');
-  let xxx = await this.waitDbPrepared();
+  await this.waitDbPrepared();
 
   console.log('countMsgBySv. executeSql select count group by serverName');
   this.dbJs.executeSql(sqlStr, [], rs=>{
@@ -395,90 +395,6 @@ export class DaoService {
  }
 
 
-
- 
-//  /**
-//   * 
-//   */
-//  async createSqliteDb(): Promise<any> {
-
-//   let createDbSql = `
-//    create table if not exists mon_msg (
-//      id integer primary key autoincrement,
-//      serverName varchar(32),
-//      reportTimestamp integer,
-//      status varchar(10),
-//      msgShort varchar(100),
-//      msgDetail varchar(65535)
-//    );
-//   `;
-
-//   return new Promise((resolve, reject)=> {
-//     console.log('create table mon_msg. 100 sqlite.create start.');
-//     this.dbJs.executeSql(createDbSql, [], rs=>{
-//       console.log('200 create mon_msg SQL done.');
-//       resolve(rs);
-//     },
-//     err => {
-//       console.log('300 create mon_msg SQLL error. json=' + JSON.stringify(err));
-//       reject(err);
-//     });
-//   })
-
-// }
-
- /**
-  * 
-  */
-//  createSqliteDb(): void {
-
-//    let createDbSql = `
-//     create table if not exists mon_msg (
-//       id integer primary key autoincrement,
-//       serverName varchar(32),
-//       reportTimestamp integer,
-//       status varchar(10),
-//       msgShort varchar(100),
-//       msgDetail varchar(65535)
-//     );
-//    `;
-
-//    createDbSql = `SELECT COUNT(*) as cnt FROM sqlite_master WHERE type='table' and name='mon_msg'`
-
-//    console.log('createSqliteDb. 100 sqlite.create start.');
-//    this.sqlite.create({
-//      name: this.DB_NAME,
-//      location: 'default'
-//    })
-//     .then((db: SQLiteObject) => {
-
-//       console.log('createSqliteDb. 200 sqlite.create done. got db object. do executeSql');
-//       console.log('createSqliteDb. 210 do executeSql. ' + createDbSql);
-//       console.log('createSqliteDb. 220 db：' + db);
-
-//       db.executeSql(createDbSql)
-//         .then((rs) => {
-//           console.log('300 Executed createDbSql SQL done.');
-//         })
-//         .catch(e => {
-//           console.log('400 Executed createDbSql SQL error.');
-//           console.log('401 Executed createDbSql SQL error. e.rows.item(0)=' + e.rows.item(0));
-//           console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e));
-//           console.log('401 Executed createDbSql SQL error. json=' + JSON.stringify(e.rows.item(0)));
-
-//           this.showObj(e);
-
-//         });
-
-
-//     })
-//     .catch(e => {
-//       console.log('500 createSqliteDb. sqlite.create error.');
-//       console.log(e)
-//     });
-//  }
-
-
  
  selfTest(): void {
 
@@ -491,13 +407,13 @@ export class DaoService {
    .then((db: SQLiteObject) => {
 
      console.log('selfTest. 200 sqlite.selfTest done.');
-     console.log('selfTest. 220 db：' + db);
+    //  console.log('selfTest. 220 db：' + db);
 
 
    })
    .catch(e => {
      console.log('500 selfTest. sqlite.create error.');
-     console.log(e)
+    //  console.log(e)
    });
 }
 

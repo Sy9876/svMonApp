@@ -1,8 +1,6 @@
-import { Component ,OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { NavController } from 'ionic-angular';
 import { Platform } from 'ionic-angular';
-
-import { HttpClient } from '@angular/common/http';
 
 import { JPush } from "@jiguang-ionic/jpush";
 import { Device } from "@ionic-native/device";
@@ -88,7 +86,7 @@ export class HomePage {
           console.log('HomePage. insertMsg done. id=' + id);
 
           notiObj.id = id;
-          
+
           // 加入页面列表
           this.addNotificationObj(notiObj);
 
@@ -250,13 +248,6 @@ addNotificationObj(notiObj: any, isPush=false) : any {
   // 需要使用这个来刷新页面，否则angular检测不到数组变化。
   this.cdr.detectChanges();
 
-  // this.msgObj.serverName = notiObj.serverName;
-  // this.msgObj.reportDate = notiObj.reportDate;
-  // this.msgObj.status = notiObj.status;
-  // this.msgObj.msgShort = notiObj.msgShort;
-  // this.msgObj.msgDetail = notiObj.msgDetail;
-
-  // return notiObj;
 }
 
 getRegistrationID() {
@@ -288,8 +279,8 @@ msgDetail(msgObj):void {
 saveMsg(msgObj): void {
   console.log('saveMsg. msgObj=' + msgObj);
 
-  let sqlStr: string = '';
-  let params: any[] = [];
+  // let sqlStr: string = '';
+  // let params: any[] = [];
 
 }
 

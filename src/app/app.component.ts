@@ -7,7 +7,6 @@ import { Device } from "@ionic-native/device";
 import { TabsPage } from '../pages/tabs/tabs';
 
 import { JPush } from '@jiguang-ionic/jpush';
-import { SQLite, SQLiteObject } from '@ionic-native/sqlite';
 
 @Component({
   templateUrl: 'app.html'
@@ -18,7 +17,7 @@ export class MyApp {
   constructor(platform: Platform, statusBar: StatusBar,
      device: Device,
      splashScreen: SplashScreen, jpush: JPush,
-     private sqlite: SQLite) {
+     ) {
 
     platform.ready().then(() => {
       console.log('MyApp  start');

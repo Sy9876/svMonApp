@@ -26,7 +26,7 @@ export class MsgDetailPage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad MsgDetailPage');
+    // console.log('ionViewDidLoad MsgDetailPage');
   }
 
 

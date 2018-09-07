@@ -13,8 +13,6 @@ import { TabsPage } from '../pages/tabs/tabs';
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 
-import {HTTP_INTERCEPTORS, HttpClientModule} from "@angular/common/http";
-import {InterceptorService} from "./interceptorService";
 import {DaoService} from "./DaoService";
 
 import { JPush } from '@jiguang-ionic/jpush';
@@ -33,8 +31,7 @@ import { SQLite } from '@ionic-native/sqlite';
   ],
   imports: [
     BrowserModule,
-    IonicModule.forRoot(MyApp),
-    HttpClientModule
+    IonicModule.forRoot(MyApp)
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -50,7 +47,6 @@ import { SQLite } from '@ionic-native/sqlite';
     StatusBar,
     SplashScreen,
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    {provide:HTTP_INTERCEPTORS,useClass:InterceptorService,multi:true},
     Device,
     JPush,
     SQLite,

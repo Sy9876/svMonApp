@@ -22,7 +22,7 @@ export class SvDetailPage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad SvDetailPage');
+    // console.log('ionViewDidLoad SvDetailPage');
   }
 
 }
