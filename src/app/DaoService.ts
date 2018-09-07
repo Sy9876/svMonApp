@@ -196,10 +196,12 @@ export class DaoService {
   this.dbJs.executeSql(sqlStr, params, rs=>{
     console.log('insertMsg. executeSql insert success');
 
-    // 获取自增id
-    this.getAutoIncreaseId('mon_msg', id=>{
-      cb(id);
-    })
+    // // 获取自增id
+    // this.getAutoIncreaseId('mon_msg', id=>{
+    //   cb(id);
+    // })
+
+    cb();
     
   },
   e=>{

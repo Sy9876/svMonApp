@@ -85,14 +85,17 @@ export class HomePage {
         this.daoService.insertMsg(notiObj, id => {
           console.log('HomePage. insertMsg done. id=' + id);
 
-          notiObj.id = id;
+          // notiObj.id = id;
 
-          // 加入页面列表
-          this.addNotificationObj(notiObj);
+          // // 加入页面列表
+          // this.addNotificationObj(notiObj);
 
-          this.msg = "Receive notification: \n" + notiObj.msgDetail;
+          // this.msg = "Receive notification: \n" + notiObj.msgDetail;
           
-          console.log('HomePage. on jpush.receiveNotification event=' + this.msg);
+          // console.log('HomePage. on jpush.receiveNotification event=' + this.msg);
+
+          // 重新加载列表
+          this.loadMsgs();
         });
 
       },
@@ -196,6 +199,13 @@ export class HomePage {
 
   ionViewDidEnter() {
     console.log('home. ionViewDidEnter. selectMsg.');
+    this.loadMsgs();
+  }
+
+
+  loadMsgs() {
+    console.log('home. loadMsgs. start.');
+
     this.daoService.selectMsg(rs=>{
       console.log('daoService.selectMsg done.');
       let cnt = 0;
@@ -212,8 +222,8 @@ export class HomePage {
         this.addNotificationObj(msgObj, true);
       }
     });
+    
   }
-
 
 
   addNotification(content: string) : any {
@@ -246,6 +256,7 @@ addNotificationObj(notiObj: any, isPush=false) : any {
   }
   
   // 需要使用这个来刷新页面，否则angular检测不到数组变化。
+  this.cdr.markForCheck();
   this.cdr.detectChanges();
 
 }
