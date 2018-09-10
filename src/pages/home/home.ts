@@ -20,6 +20,8 @@ export class HomePage {
   msg:string;
   currentTime:Date = new Date();
 
+  msgObjQueue: any[] = [];
+
   msgObj = {
     id: null,
     serverName: null,
@@ -82,21 +84,8 @@ export class HomePage {
         var notiObj = JSON.parse(content);
 
         // 插入DB
-        this.daoService.insertMsg(notiObj, id => {
-          console.log('HomePage. insertMsg done. id=' + id);
+        this.saveMsg(notiObj);
 
-          // notiObj.id = id;
-
-          // // 加入页面列表
-          // this.addNotificationObj(notiObj);
-
-          // this.msg = "Receive notification: \n" + notiObj.msgDetail;
-          
-          // console.log('HomePage. on jpush.receiveNotification event=' + this.msg);
-
-          // 重新加载列表
-          this.loadMsgs();
-        });
 
       },
       false
@@ -287,12 +276,40 @@ msgDetail(msgObj):void {
 }
 
 
-saveMsg(msgObj): void {
+async saveMsg(msgObj) {
   console.log('saveMsg. msgObj=' + msgObj);
 
-  // let sqlStr: string = '';
-  // let params: any[] = [];
+  // 加入待保存队列
+  this.msgObjQueue.push(msgObj);
 
+  // while msgObjQueue not empty
+  //   get msgObj and call insertMsg
+  while(this.msgObjQueue.length>0) {
+    let msgObjToInsert = this.msgObjQueue.shift();
+    await this.insertMsg(msgObjToInsert);
+  }
+
+  // list is empty, then showList
+  // 重新加载列表
+  this.loadMsgs();
+
+}
+
+async insertMsg(msgObj) {
+  console.log('insertMsg. msgObj=' + msgObj);
+  this.daoService.insertMsg(msgObj, id => {
+    console.log('HomePage. insertMsg done. id=' + id);
+
+    // notiObj.id = id;
+
+    // // 加入页面列表
+    // this.addNotificationObj(notiObj);
+
+    // this.msg = "Receive notification: \n" + notiObj.msgDetail;
+    
+    // console.log('HomePage. on jpush.receiveNotification event=' + this.msg);
+
+  });
 }
 
 }
